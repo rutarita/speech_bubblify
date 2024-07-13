@@ -16,6 +16,9 @@ image_files = [file for file in files_in_directory if os.path.splitext(file)[1].
 
 finish_setup = 0
 
+# Sets the default value for if the program should remove the original image_files
+delete_original_files = "false"
+
 print("Hello and welcome to speech_bubblifier! (CLI method)")
 while finish_setup == 0:
     print("current modes are:")
@@ -44,9 +47,9 @@ while finish_setup == 0:
     if mode == '1':
         finish_setup = 1
     if mode == '3':
-        print("Welcome to the bash mode!")
-        print("Supported commands are: pwd, ls, cd. they work almost like in bash")
-        print("Once you find and enter the folder you need just exit")
+        print("Welcome to the shell mode!")
+        print("Supported commands are: pwd, ls, cd. they work almost like in sh shell script, except stripped down")
+        print("Once you find and enter the folder you need, just exit")
         bash_mode = 1
 
         def cd(directory):
@@ -65,7 +68,7 @@ while finish_setup == 0:
             print(os.getcwd())
         while bash_mode:
             command = input("$ ")
-    
+
             if command.startswith("cd"):
                 _, directory = command.split(" ", 1)
                 cd(directory)
@@ -82,9 +85,10 @@ while finish_setup == 0:
                 print("Unknown command: {}".format(command))
     if mode == '4':
         sys.exit()
-# Request the user to enter the name of the image file
-# image_name = input("Enter the name of the image file (with extension): ")
-# IT WAS FOR TESTING
+if input("Do you wish to remove the original images after the operation finishes? (y/n)") == "y":
+    if input(f"Are you sure? The deletion can not be reverted resulting in {len(image_files)} images getting removed.") == "y":
+        # Set the the condition of deleting the files to true
+        delete_original_files = "true"
 for image_file in image_files:
     image_name = image_file
     # Open the image
@@ -117,12 +121,14 @@ for image_file in image_files:
     output_folder = "converted_output"
     os.makedirs(output_folder, exist_ok=True)
 
-
     filename_without_extension = os.path.splitext(image_name)[0]
 
     # Save the edited image as a GIF with a custom filename
     output_filename = f"speech_bubblified_{filename_without_extension}.gif"
     output_path = os.path.join(output_folder, output_filename)
     new_image.save(output_path, save_all=True, append_images=[new_image], duration=100, loop=0)
+    print(f"{filename_without_extension} converted to speech_bubblified_{filename_without_extension}.gif")
+    if delete_original_files == "true":
+        os.remove(image_name)
 print(f"The files were saved in {current_directory}/converted_output")
 print(f"Done! {len(image_files)} file(s) were converted")
